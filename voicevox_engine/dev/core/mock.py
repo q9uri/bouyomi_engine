@@ -25,48 +25,71 @@ class MockCoreWrapper(CoreWrapper):
     def metas(self) -> str:
         """キャラクターメタ情報を文字列として取得する。"""
         return json.dumps(
-            [
-                # トーク２つ・ハミング２つ
-                {
-                    "name": "dummy1",
-                    "styles": [
-                        {"name": "style0", "id": 0},
-                        {"name": "style1", "id": 2},
-                        {"name": "style2", "id": 4, "type": "frame_decode"},
-                        {"name": "style3", "id": 6, "type": "frame_decode"},
-                    ],
-                    "speaker_uuid": "7ffcb7ce-00ec-4bdc-82cd-45a8889e43ff",
-                    "version": "mock",
-                },
-                # トーク２つ・ハミング１つ・ソング１つ
-                {
-                    "name": "dummy2",
-                    "styles": [
-                        {"name": "style0", "id": 1},
-                        {"name": "style1", "id": 3},
-                        {"name": "style2", "id": 5, "type": "frame_decode"},
-                        {"name": "style3", "id": 7, "type": "sing"},
-                    ],
-                    "speaker_uuid": "388f246b-8c41-4ac1-8e2d-5d79f3ff56d9",
-                    "version": "mock",
-                },
+            [   
                 # トーク１つ
                 {
-                    "name": "dummy3",
+                    "name": "dvd",
                     "styles": [
-                        {"name": "style0", "id": 8},
+                        {"name": "style0", "id": 0},
                     ],
-                    "speaker_uuid": "35b2c544-660e-401e-b503-0e14c635303a",
-                    "version": "mock",
+                    "speaker_uuid": "0000000a-660e-401e-b503-0e14c635303a",
+                    "version": "old Aqustalk1 (GPL3 LICENCED)",
                 },
-                # ソング１つ
                 {
-                    "name": "dummy4",
+                    "name": "f1",
                     "styles": [
-                        {"name": "style0", "id": 9, "type": "sing"},
+                        {"name": "style0", "id": 1},
                     ],
-                    "speaker_uuid": "b1a81618-b27b-40d2-b0ea-27a9ad408c4b",
-                    "version": "mock",
+                    "speaker_uuid": "00000001-660e-401e-b503-0e14c635303a",
+                    "version": "old Aqustalk1 (GPL3 LICENCED)",
+                },
+                {
+                    "name": "f2",
+                    "styles": [
+                        {"name": "style0", "id": 2},
+                    ],
+                    "speaker_uuid": "00000002-660e-401e-b503-0e14c635303a",
+                    "version": "old Aqustalk1 (GPL3 LICENCED)",
+                },
+                {
+                    "name": "imd1",
+                    "styles": [
+                        {"name": "style0", "id": 3},
+                    ],
+                    "speaker_uuid": "00000003-660e-401e-b503-0e14c635303a",
+                    "version": "old Aqustalk1 (GPL3 LICENCED)",
+                },
+                {
+                    "name": "jgr",
+                    "styles": [
+                        {"name": "style0", "id": 4},
+                    ],
+                    "speaker_uuid": "00000004-660e-401e-b503-0e14c635303a",
+                    "version": "old Aqustalk1 (GPL3 LICENCED)",
+                },
+                {
+                    "name": "m1",
+                    "styles": [
+                        {"name": "style0", "id": 5},
+                    ],
+                    "speaker_uuid": "00000005-660e-401e-b503-0e14c635303a",
+                    "version": "old Aqustalk1 (GPL3 LICENCED)",
+                },
+                {
+                    "name": "m2",
+                    "styles": [
+                        {"name": "style0", "id": 6},
+                    ],
+                    "speaker_uuid": "00000006-660e-401e-b503-0e14c635303a",
+                    "version": "old Aqustalk1 (GPL3 LICENCED)",
+                },
+                {
+                    "name": "r1",
+                    "styles": [
+                        {"name": "style0", "id": 7},
+                    ],
+                    "speaker_uuid": "00000007-660e-401e-b503-0e14c635303a",
+                    "version": "old Aqustalk1 (GPL3 LICENCED)",
                 },
             ]
         )

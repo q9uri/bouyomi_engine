@@ -40,14 +40,31 @@ class MockTTSEngine(TTSEngine):
         flatten_moras = to_flatten_moras(query.accent_phrases)
         kana_text = "".join([mora.text for mora in flatten_moras])
 
-        raw_wave, sr_raw_wave = self.forward(kana_text)
+        raw_wave, sr_raw_wave = self.forward(kana_text, style_id)
         wave = raw_wave_to_output_wave(query, raw_wave, sr_raw_wave)
         return wave
 
-    def forward(self, text: str) -> tuple[NDArray[np.float32], int]:
+    def forward(self, text: str, style_id:int) -> tuple[NDArray[np.float32], int]:
         """文字列から pyopenjtalk を用いて音声を合成する。"""
         cli_path = _engine_dir / "bouyomi-cli/run"
-        speaker = "f1"
+
+        if style_id == 0:
+            speaker = "dvd"
+        elif style_id == 1:
+            speaker = "f1"
+        elif style_id == 2:
+            speaker = "f2"
+        elif style_id == 3:
+            speaker = "imd1"
+        elif style_id == 4:
+            speaker = "jgr"
+        elif style_id == 5:
+            speaker = "m1"
+        elif style_id == 6:
+            speaker = "m2"
+        elif style_id == 7:
+            speaker = "r1"
+
         subprocess.run(f"{str(cli_path)} {TEMP_WAVE_PATH} {text} {speaker}")
         raw_wave, samplerate = sf.read(TEMP_WAVE_PATH)
         return raw_wave.astype(np.float32), samplerate

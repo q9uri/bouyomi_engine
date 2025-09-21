@@ -4,33 +4,23 @@ from argparse import ArgumentParser
 from pathlib import Path
 from shutil import copy2, copytree
 
-from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
-parser = ArgumentParser()
-parser.add_argument("--libcore_path", type=Path)
-parser.add_argument("--libonnxruntime_path", type=Path)
-parser.add_argument("--core_model_dir_path", type=Path)
-options = parser.parse_args()
+datas = []
+datas += collect_data_files('e2k')
+datas += collect_data_files('unidic_lite')
+datas += collect_data_files('yomikata')
+datas += collect_data_files('kabosu_core')
 
-libcore_path: Path | None = options.libcore_path
-if libcore_path is not None and not libcore_path.is_file():
-    raise Exception(f"libcore_path: {libcore_path} is not file")
-
-libonnxruntime_path: Path | None = options.libonnxruntime_path
-if libonnxruntime_path is not None and not libonnxruntime_path.is_file():
-    raise Exception(f"libonnxruntime_path: {libonnxruntime_path} is not file")
-
-core_model_dir_path: Path | None = options.core_model_dir_path
-if core_model_dir_path is not None and not core_model_dir_path.is_dir():
-    raise Exception(f"core_model_dir_path: {core_model_dir_path} is not dir")
-
+hiddenimports = []
+hiddenimports += collect_submodules("transformers")
 
 a = Analysis(
     ["run.py"],
     pathex=[],
     binaries=[],
-    #datas=collect_data_files("pyopenjtalk"),
-    hiddenimports=[],
+    datas=datas,
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -78,15 +68,8 @@ target_dir = Path(DISTPATH) / "run"
 manifest_file_path = Path("engine_manifest.json")
 copy2(manifest_file_path, target_dir)
 copytree("resources", target_dir / "resources")
+copytree("bouyomi-cli", target_dir / "bouyomi-cli")
 
 license_file_path = Path("licenses.json")
 if license_file_path.is_file():
     copy2("licenses.json", target_dir)
-
-# 動的ライブラリをコピー
-if libonnxruntime_path is not None:
-    copy2(libonnxruntime_path, target_dir)
-if core_model_dir_path is not None:
-    copytree(core_model_dir_path, target_dir / "model")
-if libcore_path is not None:
-    copy2(libcore_path, target_dir)

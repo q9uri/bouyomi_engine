@@ -5,7 +5,6 @@ from typing import Final
 
 import numpy as np
 from numpy.typing import NDArray
-from pyopenjtalk import tts
 
 from ...metas.metas import StyleId
 from ...model import AudioQuery
@@ -15,7 +14,11 @@ from ...tts_pipeline.tts_engine import (
     to_flatten_moras,
 )
 from ..core.mock import MockCoreWrapper
-
+from ...utility.path_utility import engine_root
+import subprocess
+import soundfile as sf
+_engine_dir = engine_root()
+TEMP_WAVE_PATH = _engine_dir / "temp.wav"
 
 class MockTTSEngine(TTSEngine):
     """製品版コア無しに音声合成が可能なモック版TTSEngine"""
@@ -43,8 +46,8 @@ class MockTTSEngine(TTSEngine):
 
     def forward(self, text: str) -> tuple[NDArray[np.float32], int]:
         """文字列から pyopenjtalk を用いて音声を合成する。"""
-        OJT_SAMPLING_RATE: Final = 48000
-        OJT_AMPLITUDE_MAX: Final = 2 ** (16 - 1)
-        raw_wave: NDArray[np.float64] = tts(text)[0]
-        raw_wave /= OJT_AMPLITUDE_MAX
-        return raw_wave.astype(np.float32), OJT_SAMPLING_RATE
+        cli_path = _engine_dir / "bouyomi-cli/run"
+        speaker = "f1"
+        subprocess.run(f"{str(cli_path)} {TEMP_WAVE_PATH} {text} {speaker}")
+        raw_wave, samplerate = sf.read(TEMP_WAVE_PATH)
+        return raw_wave.astype(np.float32), samplerate

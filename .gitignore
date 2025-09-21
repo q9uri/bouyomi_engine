@@ -2,7 +2,8 @@
 ## Artifact of generating licenses
 /licenses.json
 licenses_venv/
-
+bouyomi-cli/
+temp.wav
 # Copied from `https://github.com/github/gitignore/blob/main/Python.gitignore` @2022-01-10
 # Byte-compiled / optimized / DLL files
 __pycache__/

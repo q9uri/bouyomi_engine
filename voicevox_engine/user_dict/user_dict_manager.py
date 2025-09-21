@@ -9,7 +9,8 @@ from pathlib import Path
 from typing import Any, Final, TypeVar
 from uuid import UUID, uuid4
 
-import pyopenjtalk
+import kabosu_core
+import jpreprocess
 from pydantic import TypeAdapter
 
 from ..utility.path_utility import get_save_dir, resource_root
@@ -158,10 +159,10 @@ class UserDictionary:
 
         random_string = uuid4()
         tmp_csv_path = user_dict_path.with_name(
-            f"user.dict_csv-{random_string}.tmp"
+            f"user.dict_csv-{random_string}.csv"
         )  # csv形式辞書データの一時保存ファイル
         tmp_compiled_path = user_dict_path.with_name(
-            f"user.dict_compiled-{random_string}.tmp"
+            f"user.dict_compiled-{random_string}.bin"
         )  # コンパイル済み辞書データの一時保存ファイル
 
         try:
@@ -208,12 +209,12 @@ class UserDictionary:
             tmp_csv_path.write_text(csv_text, encoding="utf-8")
 
             # 辞書.csvをOpenJTalk用にコンパイル
-            pyopenjtalk.mecab_dict_index(str(tmp_csv_path), str(tmp_compiled_path))
+            jpreprocess.build_dictionary(str(tmp_csv_path), str(tmp_compiled_path), user=True)
             if not tmp_compiled_path.is_file():
                 raise RuntimeError("辞書のコンパイル時にエラーが発生しました。")
 
             # コンパイル済み辞書の読み込み
-            pyopenjtalk.update_global_jtalk_with_user_dict(
+            kabosu_core.update_global_jtalk_with_user_dict(
                 str(tmp_compiled_path.resolve(strict=True))
             )  # NOTE: resolveによりコンパイル実行時でも相対パスを正しく認識できる
 

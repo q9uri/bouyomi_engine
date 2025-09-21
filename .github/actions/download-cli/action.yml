@@ -1,0 +1,119 @@
+name: "Download bouyomi-cli"
+description: |
+  bouyomi-cli をダウンロードし、指定したディレクトリに展開する。
+inputs:
+  repo:
+    description: "リポジトリ名。デフォルトは q9uri/AquesTalk-python 。"
+    required: false
+    default: "q9uri/AquesTalk-python"
+  version:
+    description: "bouyomi-cli のバージョン。latest (デフォルト) 、prerelease-latest、バージョン番号 (例: 1.0.0) で指定できる。"
+    required: false
+    default: "latest"
+  dest:
+    description: "bouyomi-cli を展開するディレクトリ。"
+    required: true
+  target:
+    description: "ダウンロードする対象。"
+    required: false
+    default: ""
+  token:
+    description: "GitHub API トークン。"
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  run_path:
+    description: "run.exe or run のパス。"
+    value: ${{ steps.result.outputs.run_path }}
+  version:
+    description: "DaisukiTTS Engine のバージョン。"
+    value: ${{ steps.result.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Setup tempdir
+      shell: bash
+      run: |
+        TEMPDIR=$(echo '${{ runner.temp }}' | sed -e 's_\\_/_g')
+        echo TEMPDIR=$TEMPDIR >> $GITHUB_ENV
+        mkdir -p $TEMPDIR
+
+        DEST=$(echo '${{ inputs.dest }}' | sed -e 's_\\_/_g')
+        echo DEST=$DEST >> $GITHUB_ENV
+
+    - name: Get version
+      shell: bash
+      run: |
+        curl -s https://api.github.com/repos/${{ inputs.repo }}/releases \
+            -H 'authorization: Bearer ${{ inputs.token }}' \
+            -H 'content-type: application/json' > $TEMPDIR/releases.json
+        cat $TEMPDIR/releases.json
+
+        if [ "${{ inputs.version }}" = "latest" ]; then
+          cat $TEMPDIR/releases.json | jq -er '[.[] | select(.prerelease == false)][0]' > $TEMPDIR/target.json
+        elif [ "${{ inputs.version }}" = "prerelease-latest" ]; then
+          cat $TEMPDIR/releases.json | jq -er '[.[] | select(.prerelease == true)][0]' > $TEMPDIR/target.json
+        else
+          cat $TEMPDIR/releases.json | jq -er '[.[] | select(.tag_name == "${{ inputs.version }}")][0]' > $TEMPDIR/target.json
+        fi
+    - name: Download and Extract
+      shell: bash
+      run: |
+        if [ "${{ inputs.target }}" = "" ]; then
+          OS=$(echo "${{ runner.os }}" | tr "[:upper:]" "[:lower:]") # 小文字にする
+          TARGET="$OS"
+        else
+          TARGET="${{ inputs.target }}"
+        fi
+
+        # リリース情報からファイル一覧の txt を取得
+        cat $TEMPDIR/target.json | jq -er '[.assets[] | select(.name | contains("'$TARGET'") and endswith(".7z.txt"))][0]' > $TEMPDIR/assets_txt.json
+
+        # アセットIDを取得してダウンロード
+        ASSET_ID=$(cat $TEMPDIR/assets_txt.json | jq -er '.id')
+        curl -sSL --retry 3 --retry-delay 5 -H 'Accept: application/octet-stream' \
+          "https://${{ inputs.token }}@api.github.com/repos/${{ inputs.repo }}/releases/assets/$ASSET_ID" \
+          > $TEMPDIR/download_name.txt
+
+        echo "Files to download:"
+        cat $TEMPDIR/download_name.txt | sed -e 's|^|- |'
+
+        # ファイル一覧の txt にあるファイルをダウンロード
+        for i in $(cat $TEMPDIR/download_name.txt); do
+          ASSET_ID=$(cat $TEMPDIR/target.json | jq -er "[.assets[] | select(.name == \"$i\")][0].id")
+          echo "Download asset id: $ASSET_ID, name: $i"
+          curl -sSL --retry 3 --retry-delay 5 -H 'Accept: application/octet-stream' \
+            "https://${{ inputs.token }}@api.github.com/repos/${{ inputs.repo }}/releases/assets/$ASSET_ID" \
+            -o "$TEMPDIR/$i" &
+        done
+
+        for job in `jobs -p`; do
+          wait $job
+        done
+
+        # 一時ディレクトリに展開してから、本体を取り出す
+        7z x -y -o$TEMPDIR/tmp-extract $TEMPDIR/$(head -1 $TEMPDIR/download_name.txt)
+        mkdir -p $DEST
+        mv $TEMPDIR/tmp-extract/$TARGET/* $DEST
+
+        # 実行ファイルのパーミッションを変更
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          chmod +x $DEST/run.exe
+        else
+          chmod +x $DEST/run
+        fi
+
+        echo "::group::ll $DEST"
+        ls -al $DEST
+        echo "::endgroup::"
+    - name: Set output
+      id: result
+      shell: bash
+      run: |
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          echo "run_path=$DEST/run.exe" >> $GITHUB_OUTPUT
+        else
+          echo "run_path=$DEST/run" >> $GITHUB_OUTPUT
+        fi
+        echo "version=$(jq -er '.tag_name' $TEMPDIR/target.json)" >> $GITHUB_OUTPUT

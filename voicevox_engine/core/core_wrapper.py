@@ -30,62 +30,6 @@ class CoreError(Exception):
     """コア呼び出しで発生したエラー"""
 
 
-def load_runtime_lib(runtime_dirs: list[Path]) -> None:
-    """
-    コアの実行に必要な依存 DLL を読み込む。検索対象ディレクトリは引数 `runtime_dirs` およびシステム検索対象ディレクトリ。
-
-    Args:
-        runtime_dirs - 直下に DLL が存在するディレクトリの一覧
-    """
-    # `lib_file_names`は「ENGINE が利用可能な DLL のファイル名一覧」である
-    # `lib_names` は「ENGINE が利用可能な DLL のライブラリ名一覧」である（ライブラリ名は `libtorch.so.1.0` の `torch` 部分）
-    match platform.system():
-        case "Windows":
-            # DirectML.dllはonnxruntimeと互換性のないWindows標準搭載のものを優先して読み込むことがあるため、明示的に読み込む
-            # 参考 1. https://github.com/microsoft/onnxruntime/issues/3360
-            # 参考 2. https://tadaoyamaoka.hatenablog.com/entry/2020/06/07/113616
-            lib_file_names = [
-                "torch_cpu.dll",
-                "torch_cuda.dll",
-                "DirectML.dll",
-                "onnxruntime.dll",
-                "voicevox_onnxruntime.dll",
-            ]
-            lib_names = [
-                "torch_cpu",
-                "torch_cuda",
-                "onnxruntime",
-                "voicevox_onnxruntime",
-            ]
-        case "Linux":
-            lib_file_names = [
-                "libtorch.so",
-                "libonnxruntime.so",
-                "libvoicevox_onnxruntime.so",
-            ]
-            lib_names = ["torch", "onnxruntime", "voicevox_onnxruntime"]
-        case "Darwin":
-            lib_file_names = ["libonnxruntime.dylib", "libvoicevox_onnxruntime.dylib"]
-            lib_names = ["onnxruntime", "voicevox_onnxruntime"]
-        case _:
-            raise RuntimeError("不明なOSです")
-
-    # 引数指定ディレクトリ直下の DLL を読み込む
-    for runtime_dir in runtime_dirs:
-        for lib_file_name in lib_file_names:
-            try:
-                CDLL(str((runtime_dir / lib_file_name).resolve(strict=True)))
-            except OSError:
-                pass
-
-    # システム検索ディレクトリ直下の DLL を読み込む
-    for lib_name in lib_names:
-        try:
-            CDLL(find_library(lib_name))
-        except (OSError, TypeError):
-            pass
-
-
 class GPUType(Enum):
     """アクセラレーターの種別。"""
 

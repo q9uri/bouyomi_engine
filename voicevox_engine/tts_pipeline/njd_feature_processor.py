@@ -2,7 +2,7 @@
 
 from dataclasses import asdict, dataclass
 
-import pyopenjtalk
+import kabosu_core
 
 from ..utility.text_utility import count_mora, replace_zenkaku_alphabets_with_hankaku
 from .katakana_english import convert_english_to_katakana, is_hankaku_alphabet
@@ -93,7 +93,7 @@ def text_to_full_context_labels(text: str, enable_katakana_english: bool) -> lis
     if len(text.strip()) == 0:
         return []
 
-    njd_features = list(map(lambda f: NjdFeature(**f), pyopenjtalk.run_frontend(text)))
+    njd_features = list(map(lambda f: NjdFeature(**f), kabosu_core.run_frontend(text)))
 
     if enable_katakana_english:
         for i, feature in enumerate(njd_features):
@@ -105,4 +105,4 @@ def text_to_full_context_labels(text: str, enable_katakana_english: bool) -> lis
         # 英単語間のスペースがpauとして扱われて読みが不自然になるため、削除する
         njd_features = _remove_pau_space_between_alphabet(njd_features)
 
-    return pyopenjtalk.make_label(list(map(asdict, njd_features)))  # type: ignore
+    return kabosu_core.make_label(list(map(asdict, njd_features)))  # type: ignore

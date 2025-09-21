@@ -36,7 +36,7 @@ def get_save_dir() -> Path:
     # FIXME: Windowsは`voicevox-engine/voicevox-engine`ディレクトリに保存されているので
     # `VOICEVOX/voicevox-engine`に変更する
     if is_development():
-        app_name = "voicevox-engine-dev"
+        app_name = "bouyomi-engine-dev"
     else:
-        app_name = "voicevox-engine"
+        app_name = "bouyomi-engine"
     return Path(user_data_dir(app_name))

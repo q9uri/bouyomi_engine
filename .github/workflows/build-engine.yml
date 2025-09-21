@@ -134,7 +134,7 @@ jobs:
       # Download bouyomi-cli
       - name: Download bouyomi-cli
         id: download-engine
-        uses: ./.github/actions/download-engine
+        uses: ./.github/actions/download-cli
         with:
           version: ${{ env.BOUYOMI_CLI_VERSION }}
           dest: ${{ github.workspace }}/bouyomi-cli

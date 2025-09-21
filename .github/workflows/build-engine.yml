@@ -129,7 +129,7 @@ jobs:
         with:
           version: ${{ env.BOUYOMI_CLI_VERSION }}
           dest: ${{ github.workspace }}/bouyomi-cli
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CLI_DOWNLOADER_TOKEN }}
 
       - name: Merge bouyomi-cli into prepackage/
         if: startsWith(matrix.artifact_name, 'windows-') || startsWith(matrix.artifact_name, 'linux-')

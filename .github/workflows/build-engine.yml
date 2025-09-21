@@ -28,8 +28,6 @@ on:
         type: boolean
         default: false
 
-env:
-
 defaults:
   run:
     shell: bash
@@ -126,7 +124,7 @@ jobs:
       
       # Download bouyomi-cli
       - name: Download bouyomi-cli
-        id: download-engine
+        id: download-cli
         uses: ./.github/actions/download-cli
         with:
           version: ${{ env.BOUYOMI_CLI_VERSION }}

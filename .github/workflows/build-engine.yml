@@ -72,6 +72,7 @@ jobs:
       # GNUコマンド
       sed: ${{ startsWith(matrix.os, 'macos-') && 'gsed' || 'sed' }}
       split: ${{ startsWith(matrix.os, 'macos-') && 'gsplit' || 'split' }}
+      BOUYOMI_CLI_VERSION: 0.1.0
 
     steps:
       - name: <Setup> Declare variables
@@ -135,10 +136,9 @@ jobs:
         id: download-engine
         uses: ./.github/actions/download-engine
         with:
-          version: ${{ env.AIVISSPEECH_ENGINE_VERSION }}
-          dest: ${{ github.workspace }}/DaisukiTTS-Engine
-          target: ${{ matrix.aivisspeech_engine_asset_name }}
-          token: ${{ secrets.ENGINE_DOWNLOADER_TOKEN }}
+          version: ${{ env.BOUYOMI_CLI_VERSION }}
+          dest: ${{ github.workspace }}/bouyomi-cli
+          token: ${{ secrets.CLI_DOWNLOADER_TOKEN }}
 
       - name: Merge bouyomi-cli into prepackage/
         if: startsWith(matrix.artifact_name, 'windows-') || startsWith(matrix.artifact_name, 'linux-')

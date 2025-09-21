@@ -25,6 +25,8 @@ from .user_dict_word import (
     part_of_speech_data,
     priority2cost,
 )
+from .dictionary.download import download_dictionary
+from .dictionary.update import update_dictionary
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -207,6 +209,8 @@ class UserDictionary:
                 )
             # 辞書データを辞書.csv へ一時保存
             tmp_csv_path.write_text(csv_text, encoding="utf-8")
+            download_dictionary()
+            update_dictionary(tmp_csv_path)
 
             # 辞書.csvをOpenJTalk用にコンパイル
             jpreprocess.build_dictionary(str(tmp_csv_path), str(tmp_compiled_path), user=True)
